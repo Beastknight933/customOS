@@ -1,0 +1,82 @@
+# Horizon OS - Desktop Architecture & Visual Identity Specification
+desktop:
+  product_name: "Horizon OS"
+  release_codename: "Singularity"
+  shell: "Caelestia KDE Port (Quickshell)"
+  window_manager: "KWin (Wayland)"
+  display_server: "Wayland"
+  login_manager: "SDDM"
+  lock_screen: "KScreenLocker"
+
+visual_identity:
+  theme_direction: "Horizon Celestia x Lord of the Mysteries x Dishonored"
+  color_scheme: "Horizon-Dark-Atmosphere"
+  palette:
+    background: "#0a0a0d"
+    surface: "#121218"
+    surface_elevated: "#181822"
+    border: "#252533"
+    primary_accent: "#5a8cba"
+    secondary_accent: "#9b72aa"
+    text_primary: "#e8e8ed"
+    text_secondary: "#8c8c9e"
+    steampunk_gold: "#b89058"
+    whisper_cyan: "#4db8a8"
+  transparency:
+    enabled: true
+    base_opacity: 0.15
+    layer_opacity: 0.25
+    blur: true
+    blur_mask: true
+  typography:
+    headline: "Outfit"
+    interface: "Rubik"
+    monospace: "Cascadia Code Nerd Font"
+    icons: "Material Symbols Variable"
+
+components:
+  sddm:
+    theme: "ryoku"
+    package_path: "custom-components/ryoku-sddm"
+    installed_path: "/usr/share/sddm/themes/ryoku"
+    config_dropin: "/etc/sddm.conf.d/99-ryoku.conf"
+    forced_pure_black_bg: true
+
+  splash:
+    theme: "Overload"
+    package_path: "custom-components/splash"
+    installed_path: "/usr/share/plasma/look-and-feel/Overload"
+    config_file: "/etc/xdg/ksplashrc"
+
+  icons:
+    theme: "candy-icons"
+    package_path: "custom-components/icons/candy-icons"
+    installed_path: "/usr/share/icons/candy-icons"
+    config_file: "/etc/xdg/kdeglobals"
+
+  shell:
+    engine: "caelestia-kde"
+    package_path: "custom-components/caelestia-kde"
+    installed_bin: "/usr/bin/quickshell"
+    autostart_binary: "/usr/bin/caelestia-autostart"
+    systemd_user_service: "/usr/lib/systemd/user/caelestia-shell.service"
+    kwin_effect: "caelestia_workspace_tracker"
+    kwin_effect_plugin: "/usr/lib/qt6/plugins/kwin/effects/plugins/caelestia_workspace_tracker.so"
+    config_path: "~/.config/caelestia/shell.json"
+    tokens_path: "~/.config/caelestia/shell-tokens.json"
+    rules:
+      bar_position: "top"
+      bar_visibility: "hover"
+      bar_persistent: false
+      dock_pinned_apps: []
+      background_layer_enabled: false
+      desktop_clock_enabled: false
+      shimeji_enabled: false
+
+exclusions:
+  caelestia_sddm_theme:
+    status: "EXCLUDED"
+    reason: "Horizon uses custom Ryoku Orbital SDDM theme. Upstream dropin /etc/sddm.conf.d/zz-caelestia.conf must be removed."
+  caelestia_lockscreen_shell:
+    status: "EXCLUDED"
+    reason: "Preserve standard KScreenLocker with Horizon atmospheric visual identity."
