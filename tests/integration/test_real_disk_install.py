@@ -138,5 +138,55 @@ class TestRealDiskInstallation(unittest.TestCase):
         for r in results:
             self.assertTrue(r.passed, f"Validator check '{r.title}' ({r.check_id}) failed: {r.details}")
 
+    def test_04_bootloader_and_recovery_cleanup(self):
+        """Test real Limine bootloader installation on Btrfs/EFI, configuration verification, and clean unmount."""
+        from backend.bootloader import BootloaderManager
+
+        # 1. Setup mock kernel and initramfs in real mounted /boot
+        boot_dir = os.path.join(self.TARGET_ROOT, "boot")
+        os.makedirs(boot_dir, exist_ok=True)
+        with open(os.path.join(boot_dir, "vmlinuz-linux"), "w") as f:
+            f.write("real-disk-kernel-stub\n")
+        with open(os.path.join(boot_dir, "initramfs-linux.img"), "w") as f:
+            f.write("real-disk-initramfs-stub\n")
+
+        # Setup Limine EFI loader
+        limine_share = os.path.join(self.TARGET_ROOT, "usr", "share", "limine")
+        os.makedirs(limine_share, exist_ok=True)
+        with open(os.path.join(limine_share, "BOOTX64.EFI"), "w") as f:
+            f.write("real-disk-limine-loader-stub\n")
+
+        logger = InstallLogger(f"{self.TARGET_ROOT}/var/log/horizon-install.log")
+        executor = InstallExecutor(dry_run=False, target_root=self.TARGET_ROOT, logger=logger)
+        
+        # 2. Run BootloaderManager
+        mgr = BootloaderManager(
+            executor=executor,
+            target_root=self.TARGET_ROOT,
+            selected_disk=self.LOOP_DEV,
+            bootloader="limine",
+            filesystem="btrfs",
+        )
+        success, msg = mgr.install()
+        self.assertTrue(success, f"Bootloader install failed on real block device: {msg}")
+
+        # 3. Verify limine.conf on the real FAT32 EFI partition
+        esp_conf = os.path.join(self.TARGET_ROOT, "boot", "efi", "limine.conf")
+        self.assertTrue(os.path.exists(esp_conf), f"limine.conf not found on real ESP: {esp_conf}")
+        with open(esp_conf, "r", encoding="utf-8") as f:
+            content = f.read()
+            self.assertIn("vmlinuz-linux", content)
+            self.assertIn("rootflags=subvol=@", content)
+
+        # 4. Test safe recovery target mount cleanup
+        cleanup_success = executor.cleanup_target_mounts(target_disk=self.LOOP_DEV)
+        logger.close()
+        self.assertTrue(cleanup_success, "Emergency target mount cleanup failed")
+
+        # Verify no mounts remain under self.TARGET_ROOT
+        with open("/proc/mounts", "r", encoding="utf-8") as f:
+            remaining = [line.split()[1] for line in f if line.split()[1].startswith(self.TARGET_ROOT)]
+        self.assertEqual(len(remaining), 0, f"Target mounts were not fully cleaned up: {remaining}")
+
 if __name__ == "__main__":
     unittest.main()

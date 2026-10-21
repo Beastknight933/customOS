@@ -1,0 +1,74 @@
+# Horizon OS - KDE Plasma Desktop & Caelestia Shell Package Set
+
+# Display Server & Wayland
+wayland
+xorg-xwayland
+
+# Display Manager (SDDM)
+sddm
+sddm-kcm
+qt6-5compat
+qt6-declarative
+qt6-svg
+
+# KDE Plasma 6 Desktop Stack
+plasma-desktop
+plasma-workspace
+kwin
+kscreenlocker
+powerdevil
+systemsettings
+kinfocenter
+kmenuedit
+polkit-kde-agent
+xdg-desktop-portal-kde
+kwallet-pam
+
+# Core KDE Applications
+dolphin
+konsole
+ark
+spectacle
+kate
+
+# Audio Stack (PipeWire)
+pipewire
+wireplumber
+pipewire-audio
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+libpipewire
+aubio
+
+# Caelestia Shell Runtime Dependencies
+quickshell
+matugen
+qt6-base
+qt6-declarative
+qt6-multimedia
+qt6-imageformats
+qt6-wayland
+kwindowsystem
+kguiaddons
+networkmanager-qt
+pulseaudio-qt
+kglobalaccel
+kconfig
+kcoreaddons
+libqalculate
+libcava
+cava
+protobuf
+libx11
+ddcutil
+brightnessctl
+power-profiles-daemon
+
+# Typography & Fonts
+ttf-material-symbols-variable
+ttf-rubik-vf
+ttf-cascadia-code-nerd
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji

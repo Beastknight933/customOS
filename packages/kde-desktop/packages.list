@@ -38,7 +38,6 @@ pipewire-audio
 pipewire-pulse
 pipewire-alsa
 pipewire-jack
-libpipewire
 aubio
 
 # Caelestia Shell Runtime Dependencies
@@ -57,7 +56,6 @@ kglobalaccel
 kconfig
 kcoreaddons
 libqalculate
-libcava
 cava
 protobuf
 libx11
@@ -67,7 +65,7 @@ power-profiles-daemon
 
 # Typography & Fonts
 ttf-material-symbols-variable
-ttf-rubik-vf
+ttf-dejavu
 ttf-cascadia-code-nerd
 noto-fonts
 noto-fonts-cjk

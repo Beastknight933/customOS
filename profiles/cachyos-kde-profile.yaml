@@ -80,7 +80,6 @@ packages:
     - pipewire-pulse
     - pipewire-alsa
     - pipewire-jack
-    - libpipewire
     - aubio
 
   display_manager:
@@ -128,7 +127,6 @@ packages:
     - kconfig
     - kcoreaddons
     - libqalculate
-    - libcava
     - cava
     - protobuf
     - libx11
@@ -139,7 +137,7 @@ packages:
 
   fonts:
     - ttf-material-symbols-variable
-    - ttf-rubik-vf
+    - ttf-dejavu
     - ttf-cascadia-code-nerd
     - noto-fonts
     - noto-fonts-cjk
