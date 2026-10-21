@@ -1,0 +1,154 @@
+# Maintainer: Horizon OS Distribution Team <maintainers@horizonos.org>
+# Upstream Maintainer: ladybug-me <rajveer2027singh@gmail.com>
+
+pkgname=caelestia-kde
+pkgver=2.6.3
+pkgrel=1
+pkgdesc='The Caelestia desktop shell, ported to KDE Plasma (Horizon OS edition)'
+arch=('x86_64' 'aarch64')
+url='https://github.com/ladybug-me/caelestia-kde'
+license=('GPL-3.0-or-later')
+depends=(
+    'bash'
+    'quickshell'
+    'matugen'
+    'python'
+    'git'
+    'plasma-workspace'
+    'qt6-base'
+    'qt6-declarative'
+    'qt6-multimedia'
+    'qt6-5compat'
+    'qt6-imageformats'
+    'qt6-svg'
+    'qt6-wayland'
+    'kwindowsystem'
+    'kguiaddons'
+    'networkmanager-qt'
+    'pulseaudio-qt'
+    'kglobalaccel'
+    'kconfig'
+    'kcoreaddons'
+    'libqalculate'
+    'libpipewire'
+    'aubio'
+    'libcava'
+    'cava'
+    'protobuf'
+    'openssl'
+    'avahi'
+    'libx11'
+    'wayland'
+    'ddcutil'
+    'brightnessctl'
+    'networkmanager'
+    'power-profiles-daemon'
+    'ttf-material-symbols-variable'
+)
+makedepends=(
+    'cmake'
+    'ninja'
+    'qt6-shadertools'
+    'extra-cmake-modules'
+    'kwin'
+    'vulkan-headers'
+)
+optdepends=(
+    'ttf-rubik-vf: clock and workspace font'
+    'ttf-cascadia-code-nerd: monospace font'
+    'konsole: terminal integration'
+    'spectacle: screenshots'
+)
+provides=('caelestia-shell')
+conflicts=('caelestia-shell' 'caelestia-shell-git')
+
+_build_dir="build"
+_effect_build_dir="effect-build"
+
+source=(
+    "caelestia-kde-v${pkgver}.tar.gz::https://github.com/ladybug-me/caelestia-kde/releases/download/v${pkgver}/caelestia-kde-v${pkgver}.tar.gz"
+    "0001-horizon-remove-sddm-override.patch"
+    "0002-horizon-disable-lockscreen-hijack.patch"
+    "0003-horizon-branding-and-paths.patch"
+    "caelestia-autostart"
+    "caelestia-shell.service"
+)
+sha256sums=(
+    'e6c2d0deea7abafa6ffda48a94bc8f5d6871639815912767a28461b523e790ac'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+
+prepare() {
+    cd "$srcdir/$pkgname-$pkgver"
+
+    # Verify submodules are present
+    local sub
+    for sub in src/dots src/yet-another-monochrome-icon-set; do
+        if [[ -z "$(ls -A "$sub" 2>/dev/null)" ]]; then
+            echo "submodule $sub is empty in the source tarball" >&2
+            return 1
+        fi
+    done
+
+    # Apply Horizon OS patches
+    patch -Np1 -i "$srcdir/0001-horizon-remove-sddm-override.patch"
+    patch -Np1 -i "$srcdir/0002-horizon-disable-lockscreen-hijack.patch"
+    patch -Np1 -i "$srcdir/0003-horizon-branding-and-paths.patch"
+}
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    cmake -B "$_build_dir" -S shell -G Ninja \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_INSTALL_PREFIX=/ \
+        -DVERSION="$pkgver" \
+        -DINSTALL_DATADIR=usr/share/caelestia \
+        -DCAELESTIA_PACKAGE=ON \
+        -DREQUIRE_CAVA=ON \
+        -DDISTRIBUTOR="Horizon OS"
+    cmake --build "$_build_dir" || exit 1
+
+    cmake -B "$_effect_build_dir" -S shell/kwin-effects/workspace-tracker -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build "$_effect_build_dir" || exit 1
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    DESTDIR="$pkgdir" cmake --install "$_build_dir"
+    DESTDIR="$pkgdir" cmake --install "$_effect_build_dir"
+
+    # NOTE: In Horizon OS, SDDM theme is managed exclusively by Ryoku SDDM theme.
+    # We explicitly do NOT install or activate any zz-caelestia.conf dropin here.
+    rm -rf "$pkgdir/etc/sddm.conf.d"
+    rm -rf "$pkgdir/usr/share/sddm/themes/caelestia"
+
+    install -d "$pkgdir/usr/lib/udev/rules.d"
+    echo 'KERNEL=="uinput", MODE="0600", OPTIONS+="static_node=uinput", TAG+="uaccess"' > "$pkgdir/usr/lib/udev/rules.d/70-uinput.rules"
+
+    install -Dm755 "$srcdir/caelestia-autostart" "$pkgdir/usr/bin/caelestia-autostart"
+    install -Dm644 "$srcdir/caelestia-shell.service" \
+        "$pkgdir/usr/lib/systemd/user/caelestia-shell.service"
+
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+    local required=(
+        usr/lib/systemd/user/caelestia-shell.service
+        usr/share/licenses/$pkgname/LICENSE
+        usr/bin/caelestia-autostart
+    )
+    local path
+    for path in "${required[@]}"; do
+        if [[ ! -e "$pkgdir/$path" ]]; then
+            echo "missing from the package: $path" >&2
+            exit 1
+        fi
+    done
+
+    echo "Horizon OS caelestia-kde package layout verified."
+}

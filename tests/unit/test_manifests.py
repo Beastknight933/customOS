@@ -59,5 +59,17 @@ class TestManifests(unittest.TestCase):
         self.assertIn("quickshell", lines)
         self.assertIn("matugen", lines)
 
+    def test_release_manifest_json(self):
+        import json
+        manifest_path = os.path.join(REPO_ROOT, "packages", "release-manifest.json")
+        self.assertTrue(os.path.exists(manifest_path), "release-manifest.json must exist")
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertEqual(data["distribution"], "Horizon OS")
+        self.assertEqual(data["base_system"]["target_kernel"], "7.2.11-1-cachyos")
+        self.assertEqual(data["base_system"]["live_kernel"], "7.2.11-arch1-1")
+        self.assertEqual(data["desktop_environment"]["plasma"], "6.8.0-1.1")
+        self.assertIn("caelestia-kde", data["installed_packages"])
+
 if __name__ == "__main__":
     unittest.main()

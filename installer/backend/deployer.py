@@ -110,9 +110,43 @@ class ComponentDeployer:
         return True
 
     def deploy_caelestia_shell(self, username: str, on_output: Optional[Callable[[str], None]] = None) -> bool:
-        """Deploy Caelestia shell configurations, user defaults, and autostart service."""
+        """Deploy Caelestia shell package, configurations, user defaults, and autostart service."""
         if on_output:
             on_output("Deploying Caelestia KDE shell & Horizon configuration...")
+
+        # Install pre-built Caelestia package if available
+        pkg_dirs = [
+            os.path.join(self.repo_root, "packages", "caelestia-kde"),
+            os.path.join(self.repo_root, "custom-components", "caelestia-kde", "packaging"),
+        ]
+        pkg_file = None
+        for pdir in pkg_dirs:
+            if os.path.exists(pdir):
+                for f in os.listdir(pdir):
+                    if f.startswith("caelestia-kde") and f.endswith(".pkg.tar.zst"):
+                        pkg_file = os.path.join(pdir, f)
+                        break
+            if pkg_file:
+                break
+
+        has_pacman = os.path.exists(os.path.join(self.target_root, "usr", "bin", "pacman"))
+        if pkg_file and has_pacman and not self.executor.dry_run:
+            target_pkg_dir = os.path.join(self.target_root, "tmp")
+            os.makedirs(target_pkg_dir, exist_ok=True)
+            pkg_name = os.path.basename(pkg_file)
+            target_pkg_path = os.path.join(target_pkg_dir, pkg_name)
+            shutil.copy2(pkg_file, target_pkg_path)
+            self.executor.logger.log(f"Installing bundled Caelestia package: {pkg_name}")
+            self.executor.chroot_exec(
+                ["pacman", "-U", "--noconfirm", "--overwrite", "*", f"/tmp/{pkg_name}"],
+                description=f"Installing {pkg_name}",
+                on_output=on_output
+            )
+            # Clean up temporary package file
+            try:
+                os.remove(target_pkg_path)
+            except OSError:
+                pass
 
         shell_json_src = os.path.join(self.repo_root, "defaults", "shell", "shell.json")
         tokens_json_src = os.path.join(self.repo_root, "defaults", "shell", "shell-tokens.json")
@@ -131,7 +165,7 @@ class ComponentDeployer:
                 if username:
                     self.executor.write_target_file(f"home/{username}/.config/caelestia/shell-tokens.json", content)
 
-        # Deploy autostart script and systemd unit
+        # Deploy autostart script and systemd unit (if not already installed by package)
         pkg_dir = os.path.join(self.repo_root, "custom-components", "caelestia-kde", "packaging")
         autostart_src = os.path.join(pkg_dir, "caelestia-autostart")
         service_src = os.path.join(pkg_dir, "caelestia-shell.service")
@@ -143,6 +177,14 @@ class ComponentDeployer:
         if os.path.exists(service_src):
             with open(service_src, "r", encoding="utf-8") as f:
                 self.executor.write_target_file("usr/lib/systemd/user/caelestia-shell.service", f.read())
+
+        # Fix ownership of user config
+        if username and not self.executor.dry_run:
+            self.executor.chroot_exec(
+                ["chown", "-R", f"{username}:{username}", f"/home/{username}/.config"],
+                description="Fixing user config ownership",
+                on_output=on_output
+            )
 
         # Enable user systemd unit
         self.executor.chroot_exec(

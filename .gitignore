@@ -10,6 +10,9 @@ target/
 *.zip
 *.qcow2
 *.iso
+!dist/SHA256SUMS
+!dist/*.txt
+!dist/*.md
 
 # Logs & temporary files
 *.log

@@ -1,0 +1,12 @@
+diff --git a/packaging/aur/caelestia-kde/caelestia-autostart b/packaging/aur/caelestia-kde/caelestia-autostart
+index 07f4886..244d463 100644
+--- a/packaging/aur/caelestia-kde/caelestia-autostart
++++ b/packaging/aur/caelestia-kde/caelestia-autostart
+@@ -15,6 +15,7 @@ export CAELESTIA_BIN_DIR="/usr/bin"
+ export QS_NO_RELOAD_POPUP=1
+ export QS_DROP_EXPENSIVE_FONTS=1
+ export QS_DISABLE_CRASH_HANDLER=1
++export CAELESTIA_DISTRIBUTOR="Horizon OS"
+ export QSG_RENDER_LOOP=threaded
+ export QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
+ 
