@@ -51,13 +51,21 @@ def validate_hostname(hostname: str) -> Tuple[bool, str]:
     return True, "Valid"
 
 def prompt_secure_password(prompt_label: str, confirm_label: str = "Confirm Password") -> str:
-    """Prompt for password with masking (non-echoing) and verification."""
+    """
+    Prompt for password with masking (non-echoing) and verification.
+    Never falls back to echoing terminal input on interactive sessions.
+    """
     while True:
         try:
             pw1 = getpass.getpass(f"  {prompt_label}: ")
-        except (EOFError, Exception):
-            line = sys.stdin.readline()
-            pw1 = line.rstrip("\r\n") if line else ""
+        except (EOFError, KeyboardInterrupt):
+            raise
+        except Exception as e:
+            if not sys.stdin.isatty():
+                line = sys.stdin.readline()
+                pw1 = line.rstrip("\r\n") if line else ""
+            else:
+                raise RuntimeError(f"Cannot securely prompt for password without echoing: {e}")
 
         if not pw1:
             print("  Password cannot be empty. Please enter a valid password.")
@@ -65,9 +73,14 @@ def prompt_secure_password(prompt_label: str, confirm_label: str = "Confirm Pass
 
         try:
             pw2 = getpass.getpass(f"  {confirm_label}: ")
-        except (EOFError, Exception):
-            line = sys.stdin.readline()
-            pw2 = line.rstrip("\r\n") if line else ""
+        except (EOFError, KeyboardInterrupt):
+            raise
+        except Exception as e:
+            if not sys.stdin.isatty():
+                line = sys.stdin.readline()
+                pw2 = line.rstrip("\r\n") if line else ""
+            else:
+                raise RuntimeError(f"Cannot securely prompt for password without echoing: {e}")
 
         if pw1 != pw2:
             print("  Passwords do not match. Please try again.")
