@@ -137,7 +137,7 @@ class ComponentDeployer:
             target_pkg_path = os.path.join(target_pkg_dir, pkg_name)
             shutil.copy2(pkg_file, target_pkg_path)
             self.executor.logger.log(f"Installing bundled Caelestia package: {pkg_name}")
-            self.executor.chroot_exec(
+            install_ok = self.executor.chroot_exec(
                 ["pacman", "-U", "--noconfirm", "--overwrite", "*", f"/tmp/{pkg_name}"],
                 description=f"Installing {pkg_name}",
                 on_output=on_output
@@ -147,6 +147,10 @@ class ComponentDeployer:
                 os.remove(target_pkg_path)
             except OSError:
                 pass
+
+            if not install_ok:
+                self.executor.logger.log(f"ERROR: Failed to install Caelestia package {pkg_name}")
+                return False
 
         shell_json_src = os.path.join(self.repo_root, "defaults", "shell", "shell.json")
         tokens_json_src = os.path.join(self.repo_root, "defaults", "shell", "shell-tokens.json")

@@ -13,6 +13,8 @@ import time
 import json
 import getpass
 import argparse
+import shutil
+import subprocess
 from typing import Dict, Any, List, Optional, Tuple
 
 # Ensure installer backend is importable
@@ -299,9 +301,41 @@ class HorizonInstallerApp:
         except EOFError:
             return False
 
+    def _validate_host_tools(self) -> Tuple[bool, List[str]]:
+        """Validate required tools are available before attempting real disk operations."""
+        required = ["parted", "mkfs.fat", "mount", "umount"]
+        if self.filesystem == "btrfs":
+            required.append("mkfs.btrfs")
+        elif self.filesystem == "ext4":
+            required.append("mkfs.ext4")
+        if self.swap_size_gib > 0:
+            required.extend(["mkswap", "swapon", "swapoff"])
+        if not self.dry_run:
+            required.extend(["pacstrap", "arch-chroot", "genfstab"])
+        missing = [cmd for cmd in required if not shutil.which(cmd)]
+        return len(missing) == 0, missing
+
     def stage_execute_installation(self) -> bool:
         self.print_header("Stage 5 of 5: Installation Execution & Component Deployment")
         print(f"  {CYAN}Executing installation pipeline...{RESET}\n")
+
+        # 1. Immediate disk re-validation and safety check
+        if not self.dry_run:
+            valid_disk, disk_err = revalidate_target_disk(self.selected_disk)
+            if not valid_disk:
+                print(f"  {BRIGHT_RED}❌ Pre-Execution Disk Safety Check Failed:{RESET} {disk_err}")
+                self.executor.logger.log(f"FATAL: Pre-execution disk safety check failed for {self.selected_disk}: {disk_err}")
+                self.executor.last_error = disk_err
+                return False
+
+            tools_ok, missing_tools = self._validate_host_tools()
+            if not tools_ok:
+                missing_str = ", ".join(missing_tools)
+                print(f"  {BRIGHT_RED}❌ Missing required host utilities:{RESET} {missing_str}")
+                print(f"  {YELLOW}Please ensure you are running within the Arch Linux live environment.{RESET}\n")
+                self.executor.logger.log(f"FATAL: Missing host utilities: {missing_tools}")
+                self.executor.last_error = f"Missing required host utilities: {missing_str}"
+                return False
 
         steps = [
             ("Partitioning and Formatting Disk", self._step_partition_and_format),
@@ -660,11 +694,13 @@ Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
         self.executor.write_target_file("etc/locale.conf", f"LANG={self.locale}\n")
         self.executor.write_target_file("etc/vconsole.conf", f"KEYMAP={self.keymap}\n")
 
-        self.executor.chroot_exec(["locale-gen"], description="Generating locales")
+        if not self.executor.chroot_exec(["locale-gen"], description="Generating locales"):
+            return False
 
         # Root Account Configuration (Locked by default, or dedicated password set)
         if getattr(self, "lock_root", True):
-            self.executor.chroot_exec(["passwd", "-l", "root"], description="Locking root account")
+            if not self.executor.chroot_exec(["passwd", "-l", "root"], description="Locking root account"):
+                return False
         else:
             if not self.executor.set_user_password("root", self.root_password, description="Setting dedicated root password"):
                 return False
@@ -681,9 +717,24 @@ Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
         sudoers_dropin = "%wheel ALL=(ALL:ALL) ALL\n"
         self.executor.write_target_file("etc/sudoers.d/10-wheel", sudoers_dropin, mode=0o440)
 
+        # Validate sudoers configuration with visudo
+        visudo_bin = shutil.which("visudo")
+        if visudo_bin and not self.dry_run:
+            target_sudoers = os.path.join(self.target_root, "etc", "sudoers.d", "10-wheel")
+            res = subprocess.run([visudo_bin, "-c", "-f", target_sudoers], capture_output=True, text=True)
+            if res.returncode != 0:
+                err_msg = f"visudo check failed on /etc/sudoers.d/10-wheel: {res.stderr.strip()}"
+                self.executor.logger.log(f"ERROR: {err_msg}")
+                self.executor.last_error = err_msg
+                return False
+            self.executor.logger.log("Sudoers configuration successfully verified with visudo")
+
         # Enable core services
         for s in ["NetworkManager", "sddm", "bluetooth", "avahi-daemon", "ananicy-cpp"]:
-            self.executor.chroot_exec(["systemctl", "enable", f"{s}.service"], description=f"Enabling {s}.service")
+            success = self.executor.chroot_exec(["systemctl", "enable", f"{s}.service"], description=f"Enabling {s}.service")
+            if not success and s in ["NetworkManager", "sddm"]:
+                self.executor.last_error = f"Failed to enable critical service: {s}.service"
+                return False
 
         return True
 

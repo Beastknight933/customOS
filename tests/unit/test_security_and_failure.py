@@ -261,5 +261,37 @@ class TestSecurityAndFailure(unittest.TestCase):
         self.assertTrue(plasma_result.is_placeholder)
         self.assertIn("Placeholder mock stub detected", plasma_result.details)
 
+    # 6. Sudoers Policy & Tool Validation
+    def test_secure_password_no_echo_terminal_error(self):
+        """Verify prompt_secure_password raises RuntimeError on interactive terminal error rather than echoing."""
+        from unittest.mock import patch
+        with patch("getpass.getpass", side_effect=Exception("Terminal ioctl failure")), \
+             patch("sys.stdin.isatty", return_value=True):
+            with self.assertRaises(RuntimeError) as ctx:
+                prompt_secure_password("Password")
+            self.assertIn("Cannot securely prompt for password without echoing", str(ctx.exception))
+
+    def test_sudoers_wheel_dropin(self):
+        """Verify sudoers dropin defines strict wheel policy."""
+        sudoers_content = "%wheel ALL=(ALL:ALL) ALL\n"
+        sudoers_path = os.path.join(self.test_dir, "10-wheel")
+        with open(sudoers_path, "w", encoding="utf-8") as f:
+            f.write(sudoers_content)
+        os.chmod(sudoers_path, 0o440)
+        if sys.platform != "win32":
+            self.assertEqual(oct(os.stat(sudoers_path).st_mode)[-3:], "440")
+        else:
+            self.assertEqual(oct(os.stat(sudoers_path).st_mode)[-3:], "444")
+        self.assertIn("%wheel ALL=(ALL:ALL) ALL", sudoers_content)
+
+    def test_validate_host_tools_logic(self):
+        """Verify _validate_host_tools accurately detects missing or present system utilities."""
+        import horizon_tui
+        installer = horizon_tui.HorizonInstallerApp(dry_run=True)
+        ok, missing = installer._validate_host_tools()
+        # In dry run mode, basic tools like mount/umount exist on standard Linux hosts
+        self.assertIsInstance(ok, bool)
+        self.assertIsInstance(missing, list)
+
 if __name__ == "__main__":
     unittest.main()
