@@ -30,7 +30,7 @@ int main() {
   expect_skipped(false, "Install SDDM theme", {{"INSTALL_SDDM", "true"}});
   expect_skipped(true, "Install optional components", Answers{});
   expect_skipped(false, "Install optional components", {{"INSTALL_ZED", "true"}});
-  expect_skipped(false, "Build Caelestia shell", Answers{});
+  expect_skipped(false, "Build Aetherium shell", Answers{});
 
   if (failures > 0) {
     std::cerr << failures << " step-policy check(s) failed\n";

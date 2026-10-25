@@ -1453,8 +1453,8 @@ Item {
             if (useAnthropic)
                 xhr.setRequestHeader("anthropic-version", "2023-06-01");
             if (root.provider === "openrouter") {
-                xhr.setRequestHeader("HTTP-Referer", "https://github.com/ladybug-me/caelestia-kde");
-                xhr.setRequestHeader("X-Title", "Caelestia Shell");
+                xhr.setRequestHeader("HTTP-Referer", "https://github.com/Beastknight933/customOS");
+                xhr.setRequestHeader("X-Title", "Aetherium Shell");
             }
         } else {
             var ollamaUrl = GlobalConfig.ai.ollamaUrl || "http://localhost:11434";

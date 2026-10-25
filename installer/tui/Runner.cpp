@@ -358,7 +358,7 @@ void draw_progress_ui(size_t current_index) {
 }
 
 void execute() {
-  string cache_dir = xdg_cache_dir() + "/caelestia-kde";
+  string cache_dir = xdg_cache_dir() + "/aetherium";
   setenv("CACHE_DIR", cache_dir.c_str(), 1);
   setenv("BUILDDIR", (cache_dir + "/makepkg-build").c_str(), 1);
   setenv("PKGDEST", (cache_dir + "/makepkg-packages").c_str(), 1);
@@ -418,7 +418,7 @@ void execute() {
   }
 
   setenv("CONFIRM_ARG", "--noconfirm", 1);
-  setenv("CAELESTIA_FRESH_INSTALL", "1", 1);
+  setenv("AETHERIUM_FRESH_INSTALL", "1", 1);
 
   // One shared install log: every step appends, and the live view tails it. It
   // carries every step's output, so it stays 0600 and never opens through a
@@ -450,7 +450,7 @@ void execute() {
     if (step_is_skipped(steps[i])) {
       steps[i].status = "SKIPPED";
       // Keep the shared log a complete record when a step is gated off.
-      dprintf(log_fd, "\n[CAELESTIA] %s (skipped)\n", steps[i].name.c_str());
+      dprintf(log_fd, "\n[AETHERIUM] %s (skipped)\n", steps[i].name.c_str());
       if (log_open) {
         UI::log_view_tick(log_path, log_state);
       } else {
@@ -469,7 +469,7 @@ void execute() {
       struct stat st{};
       if (fstat(log_fd, &st) == 0)
         start_offset = st.st_size;
-      dprintf(log_fd, "\n[CAELESTIA] %s\n", steps[i].name.c_str());
+      dprintf(log_fd, "\n[AETHERIUM] %s\n", steps[i].name.c_str());
     }
 
     string script = g_bundle_dir + "/" + steps[i].script_path;

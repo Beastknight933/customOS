@@ -233,11 +233,11 @@ if command -v sassc >/dev/null 2>&1 && ! command -v sass >/dev/null 2>&1; then
 fi
 
 if [ ${#FAILED_PKGS[@]} -ne 0 ]; then
-    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/caelestia-kde"
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/aetherium"
     err "The following packages could not be installed:"
     for pkg in "${FAILED_PKGS[@]}"; do
         err "  - $pkg"
-        echo "$pkg" >> "${XDG_CACHE_HOME:-$HOME/.cache}/caelestia-kde/failed_packages.txt"
+        echo "$pkg" >> "${XDG_CACHE_HOME:-$HOME/.cache}/aetherium/failed_packages.txt"
     done
 fi
 

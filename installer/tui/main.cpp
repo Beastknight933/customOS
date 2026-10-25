@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
     Term::restore();
 
     if (g_answers["REMOVE_CACHE"] == "true") {
-        string cache_dir = xdg_cache_dir() + "/caelestia-kde";
+        string cache_dir = xdg_cache_dir() + "/aetherium";
         // Best effort: the cache is scratch space, and a failed removal only costs
         // the next run the disk space it was asked to free.
         //
@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
         if (run_shell("qdbus6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logout 2>/dev/null") != 0)
             cerr << "[installer] warning: the session did not accept the logout request; log out manually." << endl;
     } else {
-        cout << "\nCaelestia installation complete. Remember to log out to activate your new session.\n";
+        cout << "\nAetherium installation complete. Remember to log out to activate your new session.\n";
     }
 
     // Write completion marker so setup.sh can distinguish success from early exit

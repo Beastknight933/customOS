@@ -26,20 +26,20 @@ Aetherium OS employs the installation architecture pioneered by `ladybug-me/cael
 ### 3.1 Local Checkout (Standard)
 
 ```bash
-git clone https://github.com/aetherium-os/aetherium-desktop.git
-cd aetherium-desktop
+git clone https://github.com/Beastknight933/customOS.git
+cd customOS
 bash install.sh
 ```
 
 ### 3.2 One-Command Remote Execution
 
-When published, Aetherium supports one-command installation via curl:
+Aetherium supports one-command installation via curl:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aetherium-os/aetherium-desktop/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Beastknight933/customOS/main/install.sh | bash
 ```
 
-The script detects piped execution, reconnects standard input and output to `/dev/tty`, and runs the interactive setup.
+The script detects piped execution, reconnects standard input and output to `/dev/tty`, clones or updates the repository into `~/customOS`, and runs the interactive setup.
 
 ---
 

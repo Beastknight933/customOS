@@ -56,12 +56,12 @@ Singleton {
 
         let bashCmd = `
     CURRENT_BRANCH="$1"
-    LOCAL_COMMIT="$(cat \"$HOME/.config/quickshell/caelestia/.current_commit\" 2>/dev/null || true)"
+    LOCAL_COMMIT="$(cat \"$HOME/.config/aetherium/.current_commit\" 2>/dev/null || cat \"$HOME/.config/quickshell/caelestia/.current_commit\" 2>/dev/null || true)"
 
 ALLOWED_BRANCHES="main dev"
 LIVE_ALLOWED_BRANCHES=""
 for b in $ALLOWED_BRANCHES; do
-    if git ls-remote --exit-code --heads https://github.com/ladybug-me/caelestia-kde.git "$b" >/dev/null 2>&1; then
+    if git ls-remote --exit-code --heads https://github.com/Beastknight933/customOS.git "$b" >/dev/null 2>&1; then
         LIVE_ALLOWED_BRANCHES="$LIVE_ALLOWED_BRANCHES,$b"
     fi
 done
@@ -81,6 +81,9 @@ fi
 
 STATE_HELPER=""
 for candidate in \
+    "\${AETHERIUM_LIB_DIR:-}/update-state.sh" \
+    "$HOME/.local/lib/aetherium/update-state.sh" \
+    "/usr/share/aetherium/scripts/lib/update-state.sh" \
     "\${CAELESTIA_LIB_DIR:-}/update-state.sh" \
     "$HOME/.local/lib/caelestia/update-state.sh" \
     "/usr/share/caelestia/scripts/lib/update-state.sh"; do
@@ -93,11 +96,11 @@ if [ -n "$STATE_HELPER" ]; then
     . "$STATE_HELPER"
 fi
 if [ "$2" = "1" ] && command -v update_state_set_branch >/dev/null 2>&1; then
-    update_state_set_branch "$HOME/.config/quickshell/caelestia" "$CURRENT_BRANCH" || true
+    update_state_set_branch "$HOME/.config/aetherium" "$CURRENT_BRANCH" 2>/dev/null || update_state_set_branch "$HOME/.config/quickshell/caelestia" "$CURRENT_BRANCH" || true
 fi
-REPO="$HOME/.cache/caelestia-update-repo"
+REPO="$HOME/.cache/aetherium-update-repo"
 if [ ! -d "$REPO" ]; then
-    git clone --bare --filter=blob:none https://github.com/ladybug-me/caelestia-kde.git "$REPO" >/dev/null 2>&1
+    git clone --bare --filter=blob:none https://github.com/Beastknight933/customOS.git "$REPO" >/dev/null 2>&1
 else
     git -C "$REPO" fetch --force origin "$CURRENT_BRANCH:$CURRENT_BRANCH" >/dev/null 2>&1
 fi
@@ -127,7 +130,8 @@ resolve_version() {
 if [ "$CURRENT_BRANCH" = "main" ]; then
     git -C "$REPO" fetch --tags origin >/dev/null 2>&1 || true
 
-    CURRENT_VERSION_FILE="$HOME/.config/quickshell/caelestia/.current_version"
+    CURRENT_VERSION_FILE="$HOME/.config/aetherium/.current_version"
+    [ -f "$CURRENT_VERSION_FILE" ] || CURRENT_VERSION_FILE="$HOME/.config/quickshell/caelestia/.current_version"
     FROM_VERSION=""
     if [ -f "$CURRENT_VERSION_FILE" ]; then
         FROM_VERSION="$(sed -nE 's/^VERSION[[:space:]]*=[[:space:]]*([A-Za-z0-9._-]+).*/\\1/p' "$CURRENT_VERSION_FILE" | head -n 1)"
@@ -138,7 +142,9 @@ if [ "$CURRENT_BRANCH" = "main" ]; then
     if [ -z "$FROM_VERSION" ] && [ -n "$LOCAL_COMMIT" ]; then
         FROM_VERSION="$(resolve_version "$LOCAL_COMMIT")"
     fi
-    if [ -z "$FROM_VERSION" ] && [ -f "$HOME/.config/quickshell/caelestia/.github/version.env" ]; then
+    if [ -z "$FROM_VERSION" ] && [ -f "$HOME/.config/aetherium/.github/version.env" ]; then
+        FROM_VERSION="$(sed -nE 's/^VERSION[[:space:]]*=[[:space:]]*([A-Za-z0-9._-]+).*/\\1/p' "$HOME/.config/aetherium/.github/version.env" | head -n 1)"
+    elif [ -z "$FROM_VERSION" ] && [ -f "$HOME/.config/quickshell/caelestia/.github/version.env" ]; then
         FROM_VERSION="$(sed -nE 's/^VERSION[[:space:]]*=[[:space:]]*([A-Za-z0-9._-]+).*/\\1/p' "$HOME/.config/quickshell/caelestia/.github/version.env" | head -n 1)"
     fi
     # The compiled version helper, which is what the caelestia command reports from as
@@ -229,8 +235,8 @@ def run_git(*args: str) -> str:
     return subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL)
 
 def fetch_releases() -> list:
-    url = "https://api.github.com/repos/ladybug-me/caelestia-kde/releases?per_page=100"
-    req = urllib.request.Request(url, headers={"User-Agent": "caelestia-update-checker"})
+    url = "https://api.github.com/repos/Beastknight933/customOS/releases?per_page=100"
+    req = urllib.request.Request(url, headers={"User-Agent": "aetherium-update-checker"})
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8") or "[]")
@@ -337,7 +343,8 @@ fi
             return;
         root.loadingMoreCommits = true;
         const moreCmd = `
-REPO="$HOME/.cache/caelestia-update-repo"
+REPO="$HOME/.cache/aetherium-update-repo"
+[ -d "$REPO" ] || REPO="$HOME/.cache/caelestia-update-repo"
 BRANCH="$1"
 SKIP="$2"
 LIMIT="$3"
@@ -435,9 +442,13 @@ git -C "$REPO" log --format="COMMIT%x1f%H%x1f%h%x1f%s%x1f%an%x1f%cI%x1f%P" --ski
 
         running: GlobalConfig.general.checkUpdates
         command: ["bash", "-c", `
-CONFIG="$HOME/.config/quickshell/caelestia"
+CONFIG="$HOME/.config/aetherium"
+[ -d "$CONFIG" ] || CONFIG="$HOME/.config/quickshell/caelestia"
 STATE_HELPER=""
 for candidate in \
+    "\${AETHERIUM_LIB_DIR:-}/update-state.sh" \
+    "$HOME/.local/lib/aetherium/update-state.sh" \
+    "/usr/share/aetherium/scripts/lib/update-state.sh" \
     "\${CAELESTIA_LIB_DIR:-}/update-state.sh" \
     "$HOME/.local/lib/caelestia/update-state.sh" \
     "/usr/share/caelestia/scripts/lib/update-state.sh"; do

@@ -28,6 +28,16 @@ class TestCaelestiaWorkflow(unittest.TestCase):
             res = subprocess.run(["bash", "-n", rel_p], cwd=self.root_dir, capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, f"Syntax error in {ep}: {res.stderr}")
 
+    def test_install_script_remote_repo_contract(self):
+        """install.sh must configure Beastknight933/customOS.git as default repo for remote pipe."""
+        install_sh = os.path.join(self.root_dir, "install.sh")
+        with open(install_sh, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("https://github.com/Beastknight933/customOS.git", content)
+        self.assertIn("AETHERIUM_REPO", content)
+        self.assertIn("git clone", content)
+        self.assertIn("customOS", content)
+
     def test_modular_scripts_exist(self):
         """Scripts directory must provide all modular phase steps matching upstream architecture."""
         required_scripts = [

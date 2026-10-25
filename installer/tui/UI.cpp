@@ -39,18 +39,19 @@ const char* navigate_hint() {
     return "Up/Down navigate  Enter select  Left/Esc back";
 }
 
-bool is_caelestia_installed() {
+bool is_aetherium_installed() {
     auto executable = [](const string& p) {
         return access(p.c_str(), X_OK) == 0;
     };
 
     const char* home = getenv("HOME");
-    if (home && executable(string(home) + "/.local/bin/caelestia"))
-        return true;
-    if (executable("/usr/local/bin/caelestia"))
-        return true;
-    if (executable("/usr/bin/caelestia"))
-        return true;
+    if (home) {
+        if (executable(string(home) + "/.local/bin/aetherium-doctor")) return true;
+        if (executable(string(home) + "/.local/bin/aetherium-autostart")) return true;
+        if (access((string(home) + "/.config/aetherium/install.env").c_str(), F_OK) == 0) return true;
+    }
+    if (executable("/usr/local/bin/aetherium-doctor")) return true;
+    if (executable("/usr/bin/aetherium-doctor")) return true;
 
     const char* path = getenv("PATH");
     if (path) {
@@ -61,7 +62,7 @@ bool is_caelestia_installed() {
             if (end == string::npos)
                 end = paths.size();
             string dir = paths.substr(start, end - start);
-            if (!dir.empty() && executable(dir + "/caelestia"))
+            if (!dir.empty() && executable(dir + "/aetherium-doctor"))
                 return true;
             start = end + 1;
         }
@@ -142,7 +143,7 @@ namespace UI {
                 art.push_back(line.get<string>());
             }
         }
-        if (art.empty()) art.push_back("Caelestia installer");
+        if (art.empty()) art.push_back("Aetherium installer");
 
         int art_width = 0;
         for (const auto& line : art) {
@@ -151,8 +152,8 @@ namespace UI {
         int art_height = (int)art.size();
 
         string art_color = "accent";
-        string author = "By @ladybug-me";
-        string co_author = "Co-maintainer: 0xSolanaceae";
+        string author = "By Aetherium OS Contributors";
+        string co_author = "https://github.com/Beastknight933/customOS";
         if (!g_theme.is_null() && g_theme.contains("splash_screen")) {
             if (g_theme["splash_screen"].contains("art_color"))
                 art_color = g_theme["splash_screen"]["art_color"].get<string>();
@@ -172,7 +173,7 @@ namespace UI {
             int h = g_term_height - 2;
 
             if (w < 30 || h < 12) {
-                Draw::text_center(g_term_height / 2 - 1, "Caelestia installer", "primary");
+                Draw::text_center(g_term_height / 2 - 1, "Aetherium installer", "primary");
                 Draw::text_center(g_term_height / 2, "Press Enter to continue (Esc to quit)...", "muted");
                 cout << Draw::sync_end() << flush;
                 string key = Input::wait_key();
@@ -197,7 +198,7 @@ namespace UI {
             int ty = top + art_height + 1;
             Draw::text_center(ty, author, "muted");
             Draw::text_center(ty + 1, co_author, "muted");
-            Draw::text_center(ty + 3, "Caelestia installer", "primary");
+            Draw::text_center(ty + 3, "Aetherium installer", "primary");
             Draw::text_center(ty + 6, "Detected distribution: " + distro_label(g_base_distro), "secondary");
 
             if (ty + 7 < y + h - 3)
@@ -220,10 +221,10 @@ namespace UI {
             string help;
         };
         vector<Action> actions;
-        actions.push_back({"install", "Install Caelestia", "Install the shell, packages, themes, and configs."});
-        if (is_caelestia_installed()) {
-            actions.push_back({"update", "Update Caelestia", "Pull the latest code and rebuild the shell."});
-            actions.push_back({"uninstall", "Uninstall Caelestia", "Remove the shell and restore backups where available."});
+        actions.push_back({"install", "Install Aetherium", "Install the shell, packages, themes, and configs."});
+        if (is_aetherium_installed()) {
+            actions.push_back({"update", "Update Aetherium", "Pull the latest code and rebuild the shell."});
+            actions.push_back({"uninstall", "Uninstall Aetherium", "Remove the shell and restore backups where available."});
         }
         actions.push_back({"exit", "Exit", "Leave without changing anything."});
 
@@ -240,7 +241,7 @@ namespace UI {
                 return "install";
             }
 
-            Draw::box(x, y, w, h, "CAELESTIA SETUP", "primary", "on_surface");
+            Draw::box(x, y, w, h, "AETHERIUM SETUP", "primary", "on_surface");
             Draw::text(x + 2, y + 2, navigate_hint(), "muted");
 
             for (size_t i = 0; i < actions.size(); ++i) {
@@ -599,7 +600,7 @@ namespace UI {
     }
 
     void complete_screen() {
-        string cache_dir = xdg_cache_dir() + "/caelestia-kde";
+        string cache_dir = xdg_cache_dir() + "/aetherium";
         string steps_file = cache_dir + "/failed_steps.txt";
         string pkgs_file = cache_dir + "/failed_packages.txt";
         string log_path = cache_dir + "/install.log";
@@ -681,7 +682,7 @@ namespace UI {
             y++;
             if (y < top + h - 6) {
                 Draw::text(left + 2, y++, "NEXT STEPS", Draw::bold + Draw::color("warning"));
-                Draw::text(left + 2, y++, Draw::fit("- Log out and back in to start your new Caelestia session.", content_width));
+                Draw::text(left + 2, y++, Draw::fit("- Log out and back in to start your new Aetherium session.", content_width));
                 Draw::text(left + 2, y++, Draw::fit("- Full log saved to: " + log_path, content_width), "muted");
             }
 

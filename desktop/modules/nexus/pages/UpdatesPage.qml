@@ -134,7 +134,7 @@ PageBase {
             command.push(root.selectedVersionId);
         root.selectedVersionId = "";
         // Holds the terminal open afterwards: the update restarts the shell and its output is what the user needs to read.
-        const hold = 'caelestia-update "$@"; s=$?; printf "\\n[caelestia-update exited with status %s] Press Enter to close..." "$s"; read -r _';
+        const hold = '(command -v aetherium-update >/dev/null 2>&1 && aetherium-update "$@") || (command -v caelestia-update >/dev/null 2>&1 && caelestia-update "$@") || ([ -f "$HOME/customOS/update.sh" ] && bash "$HOME/customOS/update.sh") || ([ -f "$HOME/.config/aetherium/repo/update.sh" ] && bash "$HOME/.config/aetherium/repo/update.sh"); s=$?; printf "\\n[Aetherium updater exited with status %s] Press Enter to close..." "$s"; read -r _';
         Launch.exec([...root.terminalCommand, "sh", "-c", hold, "sh", ...command]);
     }
 
@@ -145,7 +145,7 @@ PageBase {
             text: qsTr("Help")
             icon: "help"
             type: TextButton.Tonal
-            onClicked: Qt.openUrlExternally("https://github.com/ladybug-me/caelestia-kde/blob/main/docs/TROUBLESHOOTING.md#10-update-issues")
+            onClicked: Qt.openUrlExternally("https://github.com/Beastknight933/customOS/blob/main/docs/INSTALLATION.md#5-updating-aetherium-os")
         }
     ]
 
@@ -478,7 +478,7 @@ PageBase {
             command: ["sh", "-c",
                 'dir="$1"; shift; mkdir -p "$dir" && exec "$@" "$dir"',
                 "--",
-                Paths.absolutePath("~/.config/caelestia-update/backups")
+                Paths.absolutePath("~/.local/state/aetherium/backups")
             ].concat(GlobalConfig.general.apps.explorer)
         }
     }

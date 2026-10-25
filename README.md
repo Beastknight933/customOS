@@ -41,20 +41,18 @@ The installation follows the upstream Caelestia KDE repository experience: clone
 ### 3.1 Local Checkout Installation (Recommended)
 
 ```bash
-git clone https://github.com/aetherium-os/aetherium-desktop.git
-cd aetherium-desktop
+git clone https://github.com/Beastknight933/customOS.git
+cd customOS
 bash install.sh
 ```
 
 ### 3.2 One-Command Installation (Remote Pipeline)
 
-Once published to a remote release repository, Aetherium OS supports one-command remote installation via piped bash. The installer automatically detects piped execution, reconnects to the user's terminal TTY, and launches the interactive installer:
+Aetherium OS supports one-command remote installation via piped bash. The installer automatically detects piped execution, connects to the user's terminal TTY, clones or updates the repository into `~/customOS`, and launches the interactive installer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aetherium-os/aetherium-desktop/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Beastknight933/customOS/main/install.sh | bash
 ```
-
-*(Note: Prior to public release, execute from a local repository clone as described in 3.1).*
 
 ### 3.3 Installation Profiles
 

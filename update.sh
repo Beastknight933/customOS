@@ -34,8 +34,39 @@ fi
 
 section "Step 1: Inspecting Installation & Source Tree"
 
+# Read existing installation preferences
+INSTALL_ENV="$HOME/.config/aetherium/install.env"
+if [ -f "$INSTALL_ENV" ]; then
+    info "Loading persistent installation preferences from $INSTALL_ENV..."
+    set -a
+    # shellcheck disable=SC1090
+    . "$INSTALL_ENV"
+    set +a
+    if [ ! -d "$BUNDLE_DIR/.git" ] && [ -n "${AETHERIUM_REPO_DIR:-}" ] && [ -d "$AETHERIUM_REPO_DIR/.git" ]; then
+        BUNDLE_DIR="$AETHERIUM_REPO_DIR"
+        export BUNDLE_DIR
+    fi
+else
+    info "No install.env found; defaulting to desktop-lockscreen configuration."
+    INSTALL_SHELL="true"
+    INSTALL_LOCKSCREEN="true"
+    INSTALL_SDDM="false"
+    SDDM_THEME_VARIANT="aetherium"
+fi
+
+if [ ! -d "$BUNDLE_DIR/.git" ] && [ -d "$HOME/customOS/.git" ]; then
+    BUNDLE_DIR="$HOME/customOS"
+    export BUNDLE_DIR
+fi
+
 if [ -d "$BUNDLE_DIR/.git" ] && command -v git >/dev/null 2>&1; then
-    info "Git repository detected. Checking remote updates..."
+    ORIGIN_URL=$(git -C "$BUNDLE_DIR" config --get remote.origin.url 2>/dev/null || true)
+    if [ -z "$ORIGIN_URL" ]; then
+        info "Configuring remote origin (https://github.com/Beastknight933/customOS.git)..."
+        git -C "$BUNDLE_DIR" remote add origin https://github.com/Beastknight933/customOS.git 2>/dev/null || true
+    fi
+
+    info "Git repository detected at $BUNDLE_DIR. Checking remote updates..."
     git -C "$BUNDLE_DIR" fetch origin 2>/dev/null || warn "Failed to fetch from remote origin (network offline?)"
 
     STASHED=0
@@ -55,22 +86,6 @@ if [ -d "$BUNDLE_DIR/.git" ] && command -v git >/dev/null 2>&1; then
     fi
 else
     info "Stand-alone tree checkout (not a Git repository); updating local components..."
-fi
-
-# Read existing installation preferences
-INSTALL_ENV="$HOME/.config/aetherium/install.env"
-if [ -f "$INSTALL_ENV" ]; then
-    info "Loading persistent installation preferences from $INSTALL_ENV..."
-    set -a
-    # shellcheck disable=SC1090
-    . "$INSTALL_ENV"
-    set +a
-else
-    info "No install.env found; defaulting to desktop-lockscreen configuration."
-    INSTALL_SHELL="true"
-    INSTALL_LOCKSCREEN="true"
-    INSTALL_SDDM="false"
-    SDDM_THEME_VARIANT="aetherium"
 fi
 
 section "Step 2: Pre-Update Transactional Backup"

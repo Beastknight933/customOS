@@ -116,7 +116,7 @@ bool take_idle_inhibitor() {
     const char* home = getenv("HOME");
     string state_dir = string(runtime ? runtime : (getenv("XDG_STATE_HOME")
         ? getenv("XDG_STATE_HOME")
-        : (home ? string(home) + "/.local/state" : "/tmp"))) + "/caelestia";
+        : (home ? string(home) + "/.local/state" : "/tmp"))) + "/aetherium";
     std::error_code state_error;
     std::filesystem::create_directories(state_dir, state_error);
     if (state_error || chmod(state_dir.c_str(), 0700) != 0) {
@@ -137,7 +137,7 @@ bool take_idle_inhibitor() {
     pid = fork();
     if (pid == 0) {
         execlp("systemd-inhibit", "systemd-inhibit", "--what=idle:sleep",
-               "--who=Caelestia installer", "--why=Installation in progress",
+               "--who=Aetherium installer", "--why=Installation in progress",
                "bash", "-c", "while :; do sleep 600; done",
                static_cast<char*>(nullptr));
         _exit(127);
@@ -154,7 +154,7 @@ bool take_idle_inhibitor() {
             dup2(cookie_fd, STDOUT_FILENO);
         execlp("qdbus6", "qdbus6", "org.freedesktop.ScreenSaver",
                "/ScreenSaver", "org.freedesktop.ScreenSaver.Inhibit",
-               "Caelestia installer", "Installation in progress",
+               "Aetherium installer", "Installation in progress",
                static_cast<char*>(nullptr));
         _exit(127);
     }

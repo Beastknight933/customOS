@@ -222,6 +222,7 @@ fi
 # Save answers for update.sh and persistence
 mkdir -p "$HOME/.config/aetherium"
 cat > "$HOME/.config/aetherium/install.env" << EOF
+AETHERIUM_REPO_DIR='$BUNDLE_DIR'
 INSTALL_PROFILE='$PROFILE'
 INSTALL_SHELL='$INSTALL_SHELL'
 INSTALL_LOCKSCREEN='$INSTALL_LOCKSCREEN'
