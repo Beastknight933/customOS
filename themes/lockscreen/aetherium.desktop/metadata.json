@@ -1,0 +1,12 @@
+{
+    "KPackageStructure": "Plasma/Shell",
+    "X-Plasma-APIVersion": "2",
+    "KPlugin": {
+        "Id": "aetherium.desktop",
+        "Name": "Aetherium Lock Screen",
+        "Description": "Aetherium Unified Lock Screen Greeter for KDE Plasma.",
+        "Authors": [{ "Name": "Aetherium OS Project" }],
+        "License": "GPL-3.0-or-later",
+        "Version": "1.0.0"
+    }
+}

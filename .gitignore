@@ -1,0 +1,38 @@
+# Build directories
+build/
+bin/
+obj/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+build/**/Makefile
+*.ninja
+.ninja_*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# State, logs & backups
+*.log
+.cache/
+.local/
+backup/
+backups/
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini

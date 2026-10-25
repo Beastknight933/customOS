@@ -1,0 +1,104 @@
+# Maintainer: Aetherium OS Project Contributors <https://github.com/Beastknight933/customOS>
+
+pkgname=aetherium-desktop
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Aetherium OS unified desktop shell, SDDM theme, and system integration for KDE Plasma 6'
+arch=('x86_64' 'aarch64')
+url='https://github.com/Beastknight933/customOS'
+license=('GPL-3.0-or-later')
+depends=(
+    'bash'
+    'quickshell'
+    'matugen'
+    'python'
+    'plasma-workspace'
+    'qt6-base'
+    'qt6-declarative'
+    'qt6-multimedia'
+    'qt6-5compat'
+    'qt6-imageformats'
+    'qt6-svg'
+    'qt6-wayland'
+    'kwindowsystem'
+    'kguiaddons'
+    'networkmanager-qt'
+    'pulseaudio-qt'
+    'kglobalaccel'
+    'kconfig'
+    'kcoreaddons'
+    'libqalculate'
+    'aubio'
+    'cava'
+    'sddm'
+    'brightnessctl'
+    'power-profiles-daemon'
+    'ttf-rubik-vf'
+)
+makedepends=(
+    'cmake'
+    'ninja'
+    'qt6-shadertools'
+    'extra-cmake-modules'
+    'kwin'
+    'vulkan-headers'
+)
+optdepends=(
+    'ttf-cascadia-code-nerd: monospace code font'
+    'spectacle: screenshot utility'
+    'swappy: image annotation'
+    'gpu-screen-recorder: hardware accelerated recording'
+    'fprintd: biometric fingerprint unlock'
+)
+provides=('aetherium-shell' 'aetherium-sddm')
+conflicts=('caelestia-shell')
+
+build() {
+    cd "$srcdir/customOS/desktop"
+    cmake -B build -S . -G Ninja \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DVERSION="$pkgver" \
+        -DINSTALL_DATADIR=share/aetherium \
+        -DINSTALL_BINDIR=bin \
+        -DINSTALL_LIBDIR=lib/aetherium \
+        -DINSTALL_QMLDIR=lib/qt6/qml \
+        -DINSTALL_QSCONFDIR=share/aetherium/shell
+    cmake --build build
+}
+
+package() {
+    cd "$srcdir/customOS"
+
+    # Install Desktop Shell & Plugin
+    DESTDIR="$pkgdir" cmake --install desktop/build
+
+    # Install CLI Utilities
+    install -Dm755 core/bin/aetherium-doctor "$pkgdir/usr/bin/aetherium-doctor"
+    install -Dm755 core/bin/aetherium-autostart "$pkgdir/usr/bin/aetherium-autostart"
+    install -Dm755 core/sddm-adapter/aetherium-sddm-adapter.sh "$pkgdir/usr/bin/aetherium-sddm-adapter"
+
+    # Install SDDM Theme
+    install -d "$pkgdir/usr/share/sddm/themes/aetherium"
+    cp -r themes/sddm/aetherium/* "$pkgdir/usr/share/sddm/themes/aetherium/"
+
+    # Install Lock Screen Shell Package
+    install -d "$pkgdir/usr/share/plasma/shells/aetherium.desktop"
+    cp -r themes/lockscreen/aetherium.desktop/* "$pkgdir/usr/share/plasma/shells/aetherium.desktop/"
+
+    # Install Autostart Services
+    install -Dm644 packaging/aetherium-shell.service "$pkgdir/usr/lib/systemd/user/aetherium-shell.service"
+    install -Dm644 packaging/aetherium-autostart.desktop "$pkgdir/etc/xdg/autostart/aetherium-autostart.desktop"
+
+    # Install Default Configurations
+    install -Dm644 desktop/config/shell.json "$pkgdir/usr/share/aetherium/defaults/shell.json"
+    install -Dm644 desktop/config/tokens.json "$pkgdir/usr/share/aetherium/defaults/tokens.json"
+
+    # Install Scheme Presets
+    install -d "$pkgdir/usr/share/aetherium/schemes"
+    cp -r desktop/schemes/* "$pkgdir/usr/share/aetherium/schemes/"
+
+    # License and Attribution
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 THIRD_PARTY_LICENSES.md "$pkgdir/usr/share/licenses/$pkgname/THIRD_PARTY_LICENSES.md"
+}

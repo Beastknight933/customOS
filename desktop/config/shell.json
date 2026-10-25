@@ -1,0 +1,102 @@
+{
+  "general": {
+    "telemetry": false,
+    "language": "en_US"
+  },
+  "bar": {
+    "position": "top",
+    "persistent": true,
+    "showOnHover": false,
+    "scale": 1.0,
+    "livePreviews": true,
+    "dodgeWindows": false,
+    "dodgeFocusedOnly": false,
+    "dragThreshold": 20,
+    "dock": {
+      "pinnedApps": [],
+      "windowGrouping": "combined"
+    },
+    "workspaces": {
+      "shown": 6,
+      "activeIndicator": true,
+      "occupiedBg": true,
+      "showUnoccupied": true,
+      "showWindows": true,
+      "perMonitor": true,
+      "displayType": "shapes",
+      "useIcon": true
+    },
+    "tray": {
+      "compact": true,
+      "background": true
+    },
+    "status": {
+      "showAudio": true,
+      "showMicrophone": true,
+      "showNetwork": true,
+      "showWifi": true,
+      "showBluetooth": true,
+      "showBattery": true,
+      "showLockStatus": true,
+      "showNotifications": true
+    }
+  },
+  "background": {
+    "enabled": true,
+    "wallpaperEnabled": true,
+    "desktopIconsEnabled": false,
+    "slideshowEnabled": false,
+    "desktopClock": {
+      "enabled": false,
+      "background": {
+        "enabled": false
+      },
+      "shadow": {
+        "enabled": false
+      }
+    },
+    "desktopLyrics": {
+      "autoHide": true
+    },
+    "visualiser": {
+      "enabled": false
+    }
+  },
+  "appearance": {
+    "pitchBlack": false,
+    "islands": true,
+    "blur": true,
+    "blurMask": true,
+    "deformScale": 1.0,
+    "transparency": {
+      "enabled": true,
+      "base": 0.2,
+      "layers": 0.35
+    },
+    "rounding": {
+      "scale": 1.0
+    },
+    "font": {
+      "clock": "Outfit",
+      "workspaces": "Rubik"
+    },
+    "anim": {
+      "enabled": true
+    }
+  },
+  "launcher": {
+    "action": "smart",
+    "showCategories": true,
+    "viewMode": "grid"
+  },
+  "dashboard": {
+    "enabled": true
+  },
+  "utilities": {
+    "enabled": true,
+    "showOnHover": true,
+    "showKeepAwake": true,
+    "showScreenRecorder": true,
+    "showQuickToggles": true
+  }
+}

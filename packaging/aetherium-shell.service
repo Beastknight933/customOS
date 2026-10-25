@@ -1,0 +1,21 @@
+[Unit]
+Description=Aetherium Desktop Shell
+Documentation=https://github.com/Beastknight933/customOS
+PartOf=graphical-session.target
+After=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/aetherium-autostart
+Restart=on-failure
+RestartSec=1s
+TimeoutStopSec=5s
+
+# Process Environment & Sandboxing
+Slice=session.slice
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target

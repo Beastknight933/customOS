@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Aetherium Desktop Shell
+Comment=Atmospheric Unified Desktop Shell for KDE Plasma 6
+Exec=/usr/bin/aetherium-autostart
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=System;Utility;
+StartupNotify=false
+X-KDE-autostart-phase=2
+X-KDE-autostart-after=plasma-workspace
+X-KDE-Wayland-Interfaces=org_kde_plasma_shell;wlr_layer_shell_v1;ext_session_lock_v1
+OnlyShowIn=KDE;
