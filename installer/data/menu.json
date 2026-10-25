@@ -1,0 +1,108 @@
+{
+  "menu": [
+    {
+      "id": "menu_profile",
+      "type": "submenu",
+      "title": "Installation Profile",
+      "help": "Select preconfigured bundle or customize individual components.",
+      "items": [
+        {
+          "id": "INSTALL_PROFILE",
+          "type": "select",
+          "title": "Profile",
+          "help": "desktop: Shell & theme. desktop-lockscreen: Shell + lock screen. full: Shell + lock screen + SDDM. custom: fine-grained toggles.",
+          "default": "desktop-lockscreen",
+          "options": [
+            "desktop",
+            "desktop-lockscreen",
+            "full",
+            "custom"
+          ]
+        },
+        {
+          "id": "action_back",
+          "type": "action",
+          "title": "Back"
+        }
+      ]
+    },
+    {
+      "id": "menu_appearance",
+      "type": "submenu",
+      "title": "Components & Appearance",
+      "help": "Configure individual Aetherium shell, lock screen, and SDDM display manager components.",
+      "items": [
+        {
+          "id": "INSTALL_SHELL",
+          "type": "boolean",
+          "title": "Aetherium Desktop Shell",
+          "help": "Atmospheric Wayland desktop shell, bar zones, quick search launcher, and design tokens.",
+          "default": true
+        },
+        {
+          "id": "APPLY_LOCKSCREEN",
+          "type": "boolean",
+          "title": "Plasma Lock Screen Greeter",
+          "help": "Install and activate the matching in-session lock screen package (aetherium.desktop).",
+          "default": true
+        },
+        {
+          "id": "INSTALL_SDDM",
+          "type": "boolean",
+          "title": "SDDM Login Greeter Theme",
+          "help": "Install system display manager greeter with transactional backup and atomic staging.",
+          "default": false
+        },
+        {
+          "id": "SDDM_THEME_VARIANT",
+          "type": "select",
+          "title": "SDDM Theme Variant",
+          "help": "aetherium: atmospheric obsidian & azure. clockwork: Qylock neo-orbital clockwork theme.",
+          "default": "aetherium",
+          "options": [
+            "aetherium",
+            "clockwork"
+          ]
+        },
+        {
+          "id": "action_back",
+          "type": "action",
+          "title": "Back"
+        }
+      ]
+    },
+    {
+      "id": "menu_behavior",
+      "type": "submenu",
+      "title": "Installer Options",
+      "help": "Configure how the installer prepares the system and handles cache.",
+      "items": [
+        {
+          "id": "SKIP_SYSTEM_UPDATE",
+          "type": "boolean",
+          "title": "Skip system update",
+          "help": "Skip running a full distribution package update before installing components.",
+          "default": false
+        },
+        {
+          "id": "REMOVE_CACHE",
+          "type": "boolean",
+          "title": "Remove build cache after install",
+          "help": "Clear the local compilation build cache when installation completes.",
+          "default": false
+        },
+        {
+          "id": "action_back",
+          "type": "action",
+          "title": "Back"
+        }
+      ]
+    },
+    {
+      "id": "action_review",
+      "type": "action",
+      "title": "Review installation",
+      "help": "Review planned execution steps before changes are applied."
+    }
+  ]
+}

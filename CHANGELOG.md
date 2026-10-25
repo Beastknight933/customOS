@@ -2,6 +2,38 @@
 
 All notable changes to the Aetherium OS project will be documented in this file.
 
+## [1.1.0] - 2026-10-25 — Caelestia KDE Installation Model Rework
+
+### Added & Reworked
+- **Authoritative Root Entry Points (`install.sh`, `update.sh`, `uninstall.sh`):**
+  - `install.sh`: Supports local execution (`bash install.sh`) and piped remote execution (`curl -fsSL ... | bash`), automatically reconnecting to `/dev/tty` for interactive wizard mode.
+  - `update.sh`: Single-command updater that preserves user preferences (`install.env`), safely stashes uncommitted local git changes, pulls latest branch commits, creates pre-update backup snapshots, rebuilds components, updates active integrations, and reloads the desktop shell live without losing session state.
+  - `uninstall.sh`: Single-command uninstaller offering snapshot restoration from `~/.local/state/aetherium/backups/`, reverting Plasma lockscreen configuration, safely removing SDDM drop-ins, and cleaning session environments and autostart units while preserving user applications and personal data.
+- **Modular Step Script Architecture (`scripts/`):**
+  - Restructured installation lifecycle into numbered modular step scripts matching Caelestia KDE:
+    - `00-backup-themes.sh`: Transactional state snapshot creation.
+    - `00a-system-update.sh`: Distribution package upgrades (optional/skippable).
+    - `01-ensure-prereqs.sh`: Build toolchain and package manager verification (`yay`, `dnf`, `apt`).
+    - `02-all-packages.sh`: Distribution package resolution.
+    - `03-deploy-configs.sh`: Deployment of `~/.config/aetherium/` schemas and tokens.
+    - `04-deploy-session.sh`: Registration of `environment.d` and `plasma-workspace/env` drop-ins.
+    - `05-sddm-theme.sh`: Transactional SDDM greeter installation.
+    - `06-lockscreen.sh`: Plasma `aetherium.desktop` lockscreen package deployment.
+    - `08-build-shell.sh`: CMake compilation of native C++ plugins with build logging and QML fallback.
+    - `10-autostart.sh`: Systemd user service, autostart entries, and CLI utilities installation.
+    - `setup.sh`: Master setup runner coordinating interactive TUI, CLI wizard, and non-interactive profiles.
+- **Interactive TUI & Data Schemas (`installer/`):**
+  - Integrated C++ TUI installer source (`installer/tui/`) adapted for Aetherium OS (`aetherium-install`).
+  - Added `installer/data/menu.json` and `installer/data/theme.json` with Aetherium obsidian/azure palette and ASCII art.
+  - Added distribution package mappings (`installer/distro/arch`, `fedora`, `debian`).
+- **Qylock Clockwork SDDM Theme Integration:**
+  - Integrated `themes/sddm/clockwork` (neo-orbital clockwork theme from Qylock) as a first-class selectable SDDM option alongside the baseline Aetherium theme.
+  - Validated Qt6 SDDM contract (`metadata.desktop`, `Main.qml`, `font/`, fallback `bg.png`).
+- **Developer Makefile:**
+  - Added targets: `install`, `update`, `uninstall`, `build-shell`, `installer`, `doctor`, `validate`, `test`, `check`, `clean`.
+- **Automated Test Suite Expansion:**
+  - Expanded test suite from 25 to 32 unit tests, verifying root entry points, script modularity, TUI data schemas, Clockwork theme contract, and full non-interactive desktop installation & uninstallation workflow.
+
 ## [1.0.1] - 2026-10-25 — Safety Hardening & Verification Audit
 
 ### Hardened & Fixed

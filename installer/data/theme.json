@@ -1,0 +1,40 @@
+{
+  "palette": {
+    "primary": "#569cd6",
+    "accent": "#4ec9b0",
+    "seed": "#101522",
+    "container": "#161d2f",
+    "surface": "#0a0d14",
+    "on_surface": "#e8edf5",
+    "secondary": "#8b9bb4",
+    "tertiary": "#60a5fa",
+    "muted": "#64748b",
+    "success": "#4ade80",
+    "warning": "#fbbf24",
+    "error": "#f87171"
+  },
+  "splash_screen": {
+    "art": [
+      "    ___         __   __               _                 ____   _____ ",
+      "   /   |  ___  / /__/ /_  ___   _____(_)__  ______ ___  / __ \\ / ___/ ",
+      "  / /| | / _ \\/ __/ __ \\ / _ \\ / ___/ / / / / __  __ \\/ / / / \\__ \\  ",
+      " / ___ |/  __/ /_/ / / //  __// /  / / /_/ / / / / / / /_/ / ___/ /  ",
+      "/_/  |_|\\___/\\__/_/ /_/ \\___//_/  /_/\\__,_/_/ /_/ /_/\\____(_)____/   "
+    ],
+    "author": "Unified KDE Plasma 6 Desktop Shell & System Integration",
+    "co_author": "Atmospheric Design System & Safe Transactional Deployment",
+    "art_color": "accent"
+  },
+  "glyphs": {
+    "pending": "[ ]",
+    "running": "[>]",
+    "ok": "[OK]",
+    "warn": "[WARN]",
+    "failed": "[ERR]",
+    "skipped": "[SKIP]",
+    "checkbox_on": "[x]",
+    "checkbox_off": "[ ]",
+    "select_left": "<",
+    "select_right": ">"
+  }
+}

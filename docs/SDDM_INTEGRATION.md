@@ -62,7 +62,23 @@ When the external 600MB Ryoku source archive is made available, it must be integ
 
 ---
 
-## 4. Emergency Recovery Procedures
+## 4. Supported SDDM Themes
+
+Aetherium OS bundles two validated SDDM themes selectable in the installer:
+
+1. **`aetherium` (Default):**
+   - High-contrast, atmospheric deep obsidian surface with celestial azure highlights.
+   - Masked password input, session selector (Wayland/X11), user selection, and power management (Shutdown, Reboot, Suspend).
+   - High-resolution static background (`assets/background.png`).
+2. **`clockwork` (Integrated Qylock Neo-Orbital Theme):**
+   - Orbital clockwork time engine with dual-ring seconds, minute, and hour hands.
+   - Integrated Outfit font typography (`font/Outfit-Black.ttf`).
+   - Static fallback background (`bg.png`) with clean login card.
+   - Located at `themes/sddm/clockwork/` and deployed directly via the transactional adapter.
+
+---
+
+## 5. Emergency Recovery Procedures
 
 If the display manager encounters an error or fails to start the graphical interface:
 

@@ -13,6 +13,7 @@ MANIFEST_FILE="${STATE_ROOT}/install-manifest.json"
 init_backup() {
     mkdir -p "$BACKUP_DIR"
     mkdir -p "$STATE_ROOT"
+    echo "$BACKUP_DIR" > "${STATE_ROOT}/current_backup_dir"
     log_info "Initializing pre-installation snapshot at: $BACKUP_DIR"
 
     # Backup existing configuration directories if present
@@ -92,10 +93,15 @@ track_target() {
     local existed_before=0
     local backup_item=""
 
+    if [[ -f "${STATE_ROOT}/current_backup_dir" ]]; then
+        BACKUP_DIR="$(cat "${STATE_ROOT}/current_backup_dir" 2>/dev/null || true)"
+    fi
+    mkdir -p "$BACKUP_DIR"
+
     if [[ -e "$target_path" ]]; then
         existed_before=1
         local rel_name
-        rel_name="$(echo "$target_path" | tr '/' '_')"
+        rel_name="$(echo "$target_path" | tr '/:' '__')"
         backup_item="${BACKUP_DIR}/item${rel_name}"
         if [[ -d "$target_path" ]]; then
             cp -a "$target_path" "$backup_item"

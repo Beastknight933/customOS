@@ -188,6 +188,8 @@ EOF
 
 staged_install_theme() {
     local src_dir="${1:-$DEFAULT_THEME_SRC}"
+    THEME_NAME="$(basename "$src_dir")"
+    TARGET_THEME_DIR="${SYSTEM_THEMES_DIR}/${THEME_NAME}"
     require_root
 
     log_info "Step 1/5: Validating source theme files at: $src_dir"
