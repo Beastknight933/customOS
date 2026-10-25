@@ -1,8 +1,0 @@
-[SddmGreeterTheme]
-Name=ryoku
-Description=Horizon Ryoku - Orbital Clockwork SDDM Theme
-Author=Darkkal44 / Horizon OS
-Type=sddm-theme
-MainScript=Main.qml
-ConfigFile=theme.conf
-QtVersion=6

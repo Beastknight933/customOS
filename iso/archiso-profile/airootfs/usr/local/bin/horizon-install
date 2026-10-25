@@ -1,6 +1,0 @@
-#!/bin/bash
-# Horizon OS Live Installer Launcher
-export TERM=xterm-256color
-export PYTHONUNBUFFERED=1
-cd /opt/horizon-os
-exec python3 installer/horizon-tui.py "$@"
