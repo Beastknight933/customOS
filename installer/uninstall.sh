@@ -41,6 +41,8 @@ rollback_installation
 
 # 3. Clean autostart and local binaries
 rm -f "$HOME/.config/autostart/aetherium-autostart.desktop" 2>/dev/null || true
+rm -f "$HOME/.config/environment.d/aetherium.conf" 2>/dev/null || true
+rm -f "$HOME/.config/plasma-workspace/env/aetherium.sh" 2>/dev/null || true
 rm -f "$HOME/.local/bin/aetherium-autostart" 2>/dev/null || true
 rm -f "$HOME/.local/bin/aetherium-doctor" 2>/dev/null || true
 

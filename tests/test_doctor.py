@@ -2,6 +2,12 @@ import os
 import subprocess
 import json
 import unittest
+import sys
+from importlib.machinery import SourceFileLoader
+
+doctor_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "core", "bin", "aetherium-doctor"))
+aetherium_doctor = SourceFileLoader("aetherium_doctor", doctor_file).load_module()
+
 
 class TestAetheriumDoctor(unittest.TestCase):
     def setUp(self):
@@ -40,6 +46,27 @@ class TestAetheriumDoctor(unittest.TestCase):
         self.assertIn("[VALID]", res.stdout)
         self.assertIn("shell.json", res.stdout)
         self.assertIn("tokens.json", res.stdout)
+
+    def test_semantic_validation_catches_invalid_configs(self):
+        # Invalid shell config: bad position and negative scale
+        bad_shell = {
+            "general": {},
+            "bar": {"position": "invalid_diagonal", "scale": -1}
+        }
+        errs = aetherium_doctor.validate_shell_config(bad_shell)
+        self.assertTrue(len(errs) > 0)
+        self.assertTrue(any("position" in e for e in errs))
+
+        # Invalid tokens config: bad color format
+        bad_tokens = {
+            "appearance": {},
+            "semantics": {
+                "color": {"accentPrimary": "not-a-color-value"}
+            }
+        }
+        errs = aetherium_doctor.validate_tokens_config(bad_tokens)
+        self.assertTrue(len(errs) > 0)
+        self.assertTrue(any("accentPrimary" in e for e in errs))
 
 
 if __name__ == "__main__":

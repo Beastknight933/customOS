@@ -174,3 +174,21 @@ When the external 600MB Ryoku SDDM theme archive is made available, it must sati
 6. **Phase 5:** In-Session Lock Screen Integration (Plasma shell package `aetherium.desktop`).
 7. **Phase 6:** Safe Installer, Profile Engine, Rollback & Uninstaller.
 8. **Phase 7:** Automated Test Suites & Verification (Unit tests, static linting, config validation).
+
+---
+
+## 7. Implementation & Verification Status
+
+### 7.1 Implemented & Verified Components
+- **Diagnostic Engine (`aetherium-doctor`):** Supports `--json` and `--validate-configs`. Semantic validation of `shell.json` and `tokens.json`. Adheres to exit codes (`0` ready, `1` config error, `2` missing deps, `3` unsupported env). Tested via unit tests with zero privilege escalation and zero sensitive credential leaks.
+- **SDDM Integration Framework:** Staged atomic directory swapping on the same filesystem (`/usr/share/sddm/themes/.aetherium.staging-$$`), non-destructive backup of pre-existing themes and `/etc/sddm.conf.d/` drop-ins, and verified rollback without automatic display manager restarts.
+- **Installer & Rollback Engine:** JSON-formatted manifest tracking (`install-manifest.json`) recording pre-existence status (`existed_before`), strict path traversal and whitelist safety enforcement, exact KConfig rollback (`plasmashellrc` and `kscreenlockerrc` restored or deleted), and clean removal of newly created files.
+- **Design System & Metadata:** Complete schema and token verification for Aetherium dark/light schemes, lockscreen package metadata, and SDDM `metadata.desktop`.
+- **Automated Test Suite:** 25 automated unit tests executed and passing cleanly via Python's standard `unittest` framework.
+
+### 7.2 Implemented (Pending Native Linux Toolchain / Runtime Verification)
+- **Desktop Shell Native C++ Plugins:** The CMake build configuration and C++ source code adapted from Caelestia are present in `desktop/`. Compiling and linking these plugins (`libCaelestia.so`, `libCaelestiaConfig.so`, `libCaelestiaServices.so`) requires a native Linux toolchain with Qt 6.6+ and KF6 development packages (`KF6WindowSystem`, `KF6GuiAddons`, `KF6GlobalAccel`, `pipewire`, `wireplumber`).
+- **Live Wayland Compositor Session:** Full graphical execution under KWin Wayland using `wlr-layer-shell` and `ext-session-lock-v1` requires a running Linux graphical session.
+
+### 7.3 Pending External Artifacts
+- **Ryoku SDDM Theme Archive (600MB):** The external theme archive remains pending upstream delivery. The baseline Aetherium SDDM theme, adapter staging logic, verification hooks, and architectural contract are fully prepared to receive and validate the archive once provided.

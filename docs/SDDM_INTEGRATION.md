@@ -15,12 +15,12 @@ The Aetherium SDDM Adapter (`core/sddm-adapter/aetherium-sddm-adapter.sh`) guara
 
 1. **Pre-flight Detection:** Queries whether SDDM or Plasma-Login is the active display manager.
 2. **Current State Discovery:** Reads `/etc/sddm.conf` and drop-ins (`/etc/sddm.conf.d/*.conf`, `/usr/lib/sddm/sddm.conf.d/*.conf`) to determine the currently active theme.
-3. **Atomic Backup:** Writes the pre-existing theme selection and timestamps to `${XDG_STATE_HOME:-$HOME/.local/state}/aetherium/sddm/backup-theme-state.txt`.
-4. **Theme Verification:** Validates that `metadata.desktop`, `theme.conf`, and `Main.qml` are present and readable.
+3. **Atomic Backup & Theme Preservation:** Copies any pre-existing Aetherium theme directory to `${XDG_STATE_HOME:-$HOME/.local/state}/aetherium/sddm/theme-backup/` and records previous drop-in state in `backup-theme-state.txt` and `backup_manifest.json`.
+4. **Theme Verification:** Validates that `metadata.desktop`, `theme.conf`, and `Main.qml` are present and valid before touching system directories.
 5. **Greeter Verification:** Checks for `sddm-greeter-qt6` to ensure the Qt 6 runtime can execute the QML markup.
-6. **Isolated Deployment:** Copies theme files to `/usr/share/sddm/themes/aetherium/` with standard permissions (`0755` for directories, `0644` for files).
+6. **Staged Same-Filesystem Deployment:** Stages theme files into `/usr/share/sddm/themes/.aetherium.staging-$$` with standard permissions (`0755` for directories, `0644` for files), verifies content integrity, and performs an atomic directory swap on the same filesystem. The prior directory is preserved as `.aetherium.old-$$` until swap completion.
 7. **Clean Drop-in Configuration:** Writes `/etc/sddm.conf.d/zz-aetherium.conf` without touching or destroying unrelated system settings.
-8. **TTY Recovery Support:** Enables clean rollbacks from any virtual terminal if graphical login fails.
+8. **Safe Rollback (No Auto-Restart):** Enables clean rollbacks from any virtual terminal without automatically killing or restarting the active display manager, preventing unexpected session loss. The operator is prompted to restart `sddm.service` when ready.
 
 ---
 

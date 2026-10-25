@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Aetherium OS — Unified System Installer
+# Aetherium OS — Unified System Installer (Hardened)
 # Safe, transactional deployment of Aetherium Desktop, Lock Screen, and SDDM
 # ==============================================================================
 
@@ -99,6 +99,7 @@ esac
 echo
 log_info "Planned Changes for Profile '${PROFILE}':"
 [[ $INSTALL_SHELL -eq 1 ]]      && log_step "• Deploy ~/.config/aetherium/ configurations & schemes"
+[[ $INSTALL_SHELL -eq 1 ]]      && log_step "• Register environment.d and plasma-workspace session environment"
 [[ $INSTALL_SHELL -eq 1 ]]      && log_step "• Register Aetherium Desktop Shell autostart"
 [[ $INSTALL_LOCKSCREEN -eq 1 ]] && log_step "• Deploy and activate 'aetherium.desktop' Plasma lock screen"
 [[ $INSTALL_SDDM -eq 1 ]]       && log_step "• Install SDDM theme and configure drop-in at /etc/sddm.conf.d/zz-aetherium.conf"
@@ -121,42 +122,76 @@ log_info "Step 9/15: Deploying Aetherium Configurations & Tokens..."
 CFG_TARGET="$HOME/.config/aetherium"
 mkdir -p "$CFG_TARGET" "$CFG_TARGET/schemes"
 
+track_target "$CFG_TARGET/shell.json" "created"
 cp "$AETHERIUM_ROOT/desktop/config/shell.json" "$CFG_TARGET/shell.json"
-record_installed_file "$CFG_TARGET/shell.json"
 
+track_target "$CFG_TARGET/tokens.json" "created"
 cp "$AETHERIUM_ROOT/desktop/config/tokens.json" "$CFG_TARGET/tokens.json"
-record_installed_file "$CFG_TARGET/tokens.json"
 
+track_target "$CFG_TARGET/schemes" "created"
 cp -r "$AETHERIUM_ROOT/desktop/schemes/"* "$CFG_TARGET/schemes/" 2>/dev/null || true
 log_ok "Configuration deployed to $CFG_TARGET."
 
-# 6. Deploy Shell & Autostart
+# 6. Deploy Session Environment
+log_info "Step 10/15: Establishing Session Environment Variables..."
+ENV_D="$HOME/.config/environment.d"
+PLASMA_ENV_D="$HOME/.config/plasma-workspace/env"
+mkdir -p "$ENV_D" "$PLASMA_ENV_D"
+
+ENV_CONF="$ENV_D/aetherium.conf"
+track_target "$ENV_CONF" "created"
+cat > "$ENV_CONF" << EOF
+# Written by Aetherium OS. Sourced by systemd user session.
+QML2_IMPORT_PATH=$HOME/.local/lib/aetherium/qt6/qml:/usr/lib/qt6/qml
+AETHERIUM_LIB_DIR=$HOME/.local/lib/aetherium
+AETHERIUM_BIN_DIR=$HOME/.local/bin
+AETHERIUM_SHELL_CONFIG=$HOME/.config/aetherium/shell.qml
+EOF
+
+PLASMA_ENV_SH="$PLASMA_ENV_D/aetherium.sh"
+track_target "$PLASMA_ENV_SH" "created"
+cat > "$PLASMA_ENV_SH" << EOF
+#!/bin/sh
+# Written by Aetherium OS. Sourced by KDE Plasma for KWin and session processes.
+export PATH="\$HOME/.local/bin:\${PATH:+:\$PATH}"
+export QML2_IMPORT_PATH="\$HOME/.local/lib/aetherium/qt6/qml:/usr/lib/qt6/qml\${QML2_IMPORT_PATH:+:\$QML2_IMPORT_PATH}"
+export AETHERIUM_LIB_DIR="\$HOME/.local/lib/aetherium"
+export AETHERIUM_BIN_DIR="\$HOME/.local/bin"
+export AETHERIUM_SHELL_CONFIG="\$HOME/.config/aetherium/shell.qml"
+EOF
+chmod +x "$PLASMA_ENV_SH"
+log_ok "Session environment written."
+
+# 7. Deploy Shell & Autostart
 if [[ $INSTALL_SHELL -eq 1 ]]; then
-    log_info "Step 10/15: Establishing Desktop Shell Integration..."
+    log_info "Step 11/15: Establishing Desktop Shell Integration..."
     BIN_DIR="$HOME/.local/bin"
     AUTOSTART_DIR="$HOME/.config/autostart"
     mkdir -p "$BIN_DIR" "$AUTOSTART_DIR"
 
+    track_target "$BIN_DIR/aetherium-autostart" "created"
     cp "$AETHERIUM_ROOT/core/bin/aetherium-autostart" "$BIN_DIR/aetherium-autostart"
     chmod +x "$BIN_DIR/aetherium-autostart"
-    record_installed_file "$BIN_DIR/aetherium-autostart"
 
+    track_target "$BIN_DIR/aetherium-doctor" "created"
     cp "$AETHERIUM_ROOT/core/bin/aetherium-doctor" "$BIN_DIR/aetherium-doctor"
     chmod +x "$BIN_DIR/aetherium-doctor"
-    record_installed_file "$BIN_DIR/aetherium-doctor"
 
+    track_target "$AUTOSTART_DIR/aetherium-autostart.desktop" "created"
     cp "$AETHERIUM_ROOT/packaging/aetherium-autostart.desktop" "$AUTOSTART_DIR/aetherium-autostart.desktop"
-    record_installed_file "$AUTOSTART_DIR/aetherium-autostart.desktop"
     log_ok "Desktop Shell autostart established."
 fi
 
-# 7. Configure Lock Screen
+# 8. Configure Lock Screen
 if [[ $INSTALL_LOCKSCREEN -eq 1 ]]; then
-    log_info "Step 11/15: Configuring In-Session Plasma Lock Screen..."
+    log_info "Step 12/15: Configuring In-Session Plasma Lock Screen..."
     LOCAL_PLASMA_SHELLS="$HOME/.local/share/plasma/shells/aetherium.desktop"
+    mkdir -p "$(dirname "$LOCAL_PLASMA_SHELLS")"
+
+    track_target "$LOCAL_PLASMA_SHELLS" "created"
+    rm -rf "$LOCAL_PLASMA_SHELLS"
     mkdir -p "$LOCAL_PLASMA_SHELLS"
     cp -r "$AETHERIUM_ROOT/themes/lockscreen/aetherium.desktop/"* "$LOCAL_PLASMA_SHELLS/"
-    record_installed_file "$LOCAL_PLASMA_SHELLS"
 
     if command -v kwriteconfig6 &>/dev/null; then
         kwriteconfig6 --file plasmashellrc --group "Shell" --key "ShellPackage" "aetherium.desktop"
@@ -167,19 +202,19 @@ if [[ $INSTALL_LOCKSCREEN -eq 1 ]]; then
     fi
 fi
 
-# 8. Configure SDDM
+# 9. Configure SDDM
 if [[ $INSTALL_SDDM -eq 1 ]]; then
-    log_info "Step 12/15: Installing and Configuring SDDM Greeter Theme..."
+    log_info "Step 13/15: Installing and Configuring SDDM Greeter Theme..."
     bash "$AETHERIUM_ROOT/core/sddm-adapter/aetherium-sddm-adapter.sh" --install "$AETHERIUM_ROOT/themes/sddm/aetherium"
     log_ok "SDDM Greeter configured."
 fi
 
-# 9. Validation
-log_info "Step 13/15: Running Post-Installation Validation..."
+# 10. Validation
+log_info "Step 14/15: Running Post-Installation Validation..."
 python3 "$AETHERIUM_ROOT/core/bin/aetherium-doctor" --validate-configs
 log_ok "Validation passed."
 
-# 10. Summary
+# 11. Summary
 echo
 echo -e "${C_GREEN}${C_BOLD}╔════════════════════════════════════════════════════════════════╗${C_RESET}"
 echo -e "${C_GREEN}${C_BOLD}║              AETHERIUM OS INSTALLED SUCCESSFULLY              ║${C_RESET}"

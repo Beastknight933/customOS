@@ -67,6 +67,22 @@ aetherium-doctor
 
 ---
 
+## Implementation & Verification Status
+
+| Component | Status | Details / Verification Method |
+| :--- | :--- | :--- |
+| **Design System & Tokens** | **Verified** | Semantic color palettes, motion timings, spacing, and schema validated via automated tests (`test_tokens.py`, `test_configs.py`). |
+| **Diagnostic Engine (`aetherium-doctor`)** | **Verified** | JSON output, semantic configuration validation, and meaningful exit codes validated via `test_doctor.py`. Zero secret exposure; runs unprivileged. |
+| **SDDM Greeter Adapter** | **Verified** | Staged atomic replacement, pre-flight backup, rollback, and theme validation verified via unit tests (`test_sddm_adapter.py`, `test_sddm_theme.py`). |
+| **Baseline SDDM Theme** | **Verified** | QML syntax, PAM auth contract, session selection, and static fallback verified. |
+| **Plasma Lock Screen Package** | **Verified** | `metadata.json`, QML component structure, and PAM contract verified via `test_lockscreen.py`. |
+| **Installer & Rollback Engine** | **Verified** | Staged installation manifests, pre-existing vs new file tracking, path whitelist security, and exact KConfig rollbacks verified via `test_manifest_and_rollback.py` and `test_installer_logic.py`. |
+| **Desktop Shell QML Modules** | **Implemented** | Complete QML codebase adapted from Caelestia KDE (`desktop/shell/`). |
+| **C++ Desktop Shell Plugins** | **Implemented (Pending Runtime)** | CMake configuration and C++ source code ready; compilation and live session execution require native Linux environment with Qt 6.6+ and KDE Frameworks 6 headers. |
+| **Ryoku SDDM Theme (600MB Archive)** | **Pending Upstream** | The external 600MB theme archive is pending delivery. The adapter contract (`docs/SDDM_INTEGRATION.md`), baseline theme, and staging engine are in place ready to ingest it. |
+
+---
+
 ## Documentation Index
 
 - [Architecture & Reconnaissance](docs/ARCHITECTURE.md)
